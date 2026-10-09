@@ -1,3 +1,4 @@
+
 import axios from "axios";
 import qs from "qs";
 
@@ -10,30 +11,32 @@ if (!STRAPI_URL) {
 }
 
 export const api = axios.create({
-
   baseURL: `${STRAPI_URL}/api`,
-
   headers: {
-
     "Content-Type": "application/json",
-
   },
-
   timeout: 30000,
-
   paramsSerializer: {
-
     serialize: (params) => {
-
-      return qs.stringify(
-        params,
-        {
-          encodeValuesOnly: true,
-        },
-      );
-
+      return qs.stringify(params, {
+        encodeValuesOnly: true,
+      });
     },
-
   },
-
 });
+
+// Diagnóstico temporal de errores de Strapi
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    console.error("[STRAPI API ERROR]", {
+      status: error.response?.status,
+      method: error.config?.method,
+      baseURL: error.config?.baseURL,
+      url: error.config?.url,
+      responseData: error.response?.data,
+    });
+
+    return Promise.reject(error);
+  },
+);
